@@ -2,6 +2,7 @@ package com.hospital.ouc.registrationsystem.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.hospital.ouc.registrationsystem.domain.enums.Gender;
 
 /**
  * 患者档案实体，对应数据库表 patient_profile。
@@ -53,8 +54,9 @@ public class PatientProfile {
     private Integer age;
 
     /**
-     * 性别（非空），数据库为 gender_enum，这里以字符串映射（male/female）
+     * 性别（非空），数据库为 gender_enum，使用 Java 枚举并以字符串持久化（male/female）
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private String gender; // 'male' | 'female'
+    private Gender gender; // male | female
 }

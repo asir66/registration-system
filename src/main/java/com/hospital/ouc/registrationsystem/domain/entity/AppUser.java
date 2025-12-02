@@ -2,6 +2,7 @@ package com.hospital.ouc.registrationsystem.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.hospital.ouc.registrationsystem.domain.enums.Role;
 
 import java.time.LocalDateTime;
 
@@ -37,10 +38,11 @@ public class AppUser {
     private String password;
 
     /**
-     * 角色（非空）：PATIENT / DOCTOR / ADMIN
+     * 角色（非空）：PATIENT / DOCTOR / ADMIN，使用 Java 枚举并以字符串持久化
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String role;
+    private Role role;
 
     /**
      * 账户创建时间（由数据库默认值生成，应用侧只读）
