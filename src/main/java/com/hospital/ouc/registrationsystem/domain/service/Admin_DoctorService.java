@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class Admin_DoctorService {
+public class AdminDoctorService {
     private final DoctorProfileRepository doctorProfileRepository;
     private final AppUserRepository appUserRepository;
     private final DepartmentRepository departmentRepository;
