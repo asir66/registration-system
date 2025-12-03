@@ -2,6 +2,7 @@ package com.hospital.ouc.registrationsystem.web;
 
 import com.hospital.ouc.registrationsystem.domain.service.DoctorScheduleService;
 import com.hospital.ouc.registrationsystem.web.dto.DoctorDayScheduleItem;
+import com.hospital.ouc.registrationsystem.web.dto.DoctorWeekScheduleItem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +29,14 @@ public class DoctorController {
             @RequestParam String doctorId,
             @RequestParam Integer weekday) {
         return ResponseEntity.ok(doctorScheduleService.getDaySchedule(doctorId, weekday));
+    }
+
+    /**
+     * 查询医生本周排班（周一到周五，每日 8 个时段）。
+     */
+    @GetMapping("/week-schedule")
+    public ResponseEntity<List<DoctorWeekScheduleItem>> getWeekSchedule(
+            @RequestParam String doctorId) {
+        return ResponseEntity.ok(doctorScheduleService.getWeekSchedule(doctorId));
     }
 }

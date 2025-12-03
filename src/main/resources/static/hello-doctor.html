@@ -22,6 +22,10 @@
   <h2>当日日程（按时段）</h2>
   <div id="list"></div>
 
+  <h2>本周值班表</h2>
+  <button id="refreshWeek">刷新本周排班</button>
+  <div id="weekTable"></div>
+
   <script>
     // 登录页写入 sessionStorage 的登录信息
     const authInfo = (() => {
@@ -40,6 +44,10 @@
     const weekdaySelect = document.getElementById('weekday');
     const queryBtn = document.getElementById('query');
     const listDiv = document.getElementById('list');
+    const refreshWeekBtn = document.getElementById('refreshWeek');
+    const weekTableDiv = document.getElementById('weekTable');
+    const weekdays = ['周一', '周二', '周三', '周四', '周五'];
+    const timeslots = ['AM1', 'AM2', 'AM3', 'AM4', 'PM1', 'PM2', 'PM3', 'PM4'];
 
     function render(items) {
       if (!Array.isArray(items) || items.length === 0) {
@@ -69,6 +77,44 @@
         listDiv.textContent = '请求失败：' + e;
       }
     });
+
+    function renderWeekTable(items) {
+      // 建立 map：timeslot-weekday -> department
+      const map = {};
+      (items || []).forEach(it => {
+        const key = `${it.timeslot}-${it.weekday}`;
+        map[key] = it.department || '';
+      });
+
+      let html = '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;text-align:center;">';
+      html += '<thead><tr>' + weekdays.map(w => `<th>${w}</th>`).join('') + '</tr></thead>';
+      html += '<tbody>';
+      timeslots.forEach(ts => {
+        html += '<tr>';
+        weekdays.forEach((_, idx) => {
+          const key = `${ts}-${idx + 1}`;
+          const dept = map[key] || '—';
+          html += `<td><div><strong>${ts}</strong></div><div>${dept}</div></td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      weekTableDiv.innerHTML = html;
+    }
+
+    async function loadWeekSchedule() {
+      try {
+        const resp = await fetch(`/api/doctor/week-schedule?doctorId=${encodeURIComponent(authInfo.doctorId)}`);
+        const data = await resp.json();
+        renderWeekTable(data);
+      } catch (e) {
+        weekTableDiv.textContent = '加载失败：' + e;
+      }
+    }
+
+    refreshWeekBtn.addEventListener('click', loadWeekSchedule);
+    // 页面加载时自动拉取一次本周排班
+    loadWeekSchedule();
   </script>
 </body>
 </html>

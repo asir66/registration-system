@@ -2,8 +2,10 @@ package com.hospital.ouc.registrationsystem.domain.service;
 
 import com.hospital.ouc.registrationsystem.domain.entity.PatientDoctorRegistration;
 import com.hospital.ouc.registrationsystem.domain.entity.PatientProfile;
+import com.hospital.ouc.registrationsystem.domain.repository.DoctorDepartmentScheduleRepository;
 import com.hospital.ouc.registrationsystem.domain.repository.PatientDoctorRegistrationRepository;
 import com.hospital.ouc.registrationsystem.web.dto.DoctorDayScheduleItem;
+import com.hospital.ouc.registrationsystem.web.dto.DoctorWeekScheduleItem;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +15,12 @@ import java.util.stream.Collectors;
 public class DoctorScheduleService {
 
     private final PatientDoctorRegistrationRepository registrationRepository;
+    private final DoctorDepartmentScheduleRepository scheduleRepository;
 
-    public DoctorScheduleService(PatientDoctorRegistrationRepository registrationRepository) {
+    public DoctorScheduleService(PatientDoctorRegistrationRepository registrationRepository,
+                                 DoctorDepartmentScheduleRepository scheduleRepository) {
         this.registrationRepository = registrationRepository;
+        this.scheduleRepository = scheduleRepository;
     }
 
     /**
@@ -35,5 +40,18 @@ public class DoctorScheduleService {
             item.setPatientGender(p.getGender().name());
             return item;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 查询医生本周排班（周一到周五，每天 8 个时段）。
+     */
+    public List<DoctorWeekScheduleItem> getWeekSchedule(String doctorId) {
+        return scheduleRepository.findByDoctorProfile_DoctorId(doctorId).stream()
+                .map(s -> new DoctorWeekScheduleItem(
+                        s.getWeekday(),
+                        s.getTimeslot().name(),
+                        s.getDepartment() == null ? "" : s.getDepartment().getDepartmentName()
+                ))
+                .collect(Collectors.toList());
     }
 }
