@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS app_user CASCADE;
 DROP TABLE IF EXISTS department CASCADE;
 
 -- ==========================================
--- Drop ENUM types (time_slot 保留；性别改为 VARCHAR+CHECK)
+-- Drop ENUM types (统一改为 VARCHAR+CHECK)
 -- ==========================================
 DROP TYPE IF EXISTS gender_enum CASCADE;
 DROP TYPE IF EXISTS time_slot CASCADE;
@@ -19,12 +19,8 @@ DROP TYPE IF EXISTS time_slot CASCADE;
 -- ==========================================
 -- ENUM Definitions
 -- ==========================================
--- 性别枚举不再使用数据库类型，改为 VARCHAR + CHECK 约束
-
-CREATE TYPE time_slot AS ENUM (
-    'AM1', 'AM2', 'AM3', 'AM4',
-    'PM1', 'PM2', 'PM3', 'PM4'
-);
+-- 性别与时段均不再使用数据库 ENUM 类型，统一改为 VARCHAR + CHECK 约束
+-- （便于跨数据库迁移与与 JPA @Enumerated(EnumType.STRING) 的一致性）
 
 -- ==========================================
 -- User Table (Unified Login Table)
@@ -131,7 +127,7 @@ CREATE TABLE patient_doctor_registration (
     disease_id INT REFERENCES disease(id),
 
     weekday INT NOT NULL CHECK (weekday BETWEEN 1 AND 5),
-    timeslot time_slot NOT NULL,
+    timeslot VARCHAR(4) NOT NULL CHECK (timeslot IN ('AM1','AM2','AM3','AM4','PM1','PM2','PM3','PM4')),
     registration_time TIMESTAMP NOT NULL DEFAULT NOW(),
     status VARCHAR(20) NOT NULL
 );
@@ -144,7 +140,7 @@ CREATE TABLE doctor_department_schedule (
     doctor_profile_id INT REFERENCES doctor_profile(id),
     department_id INT REFERENCES department(id),
     weekday INT NOT NULL CHECK (weekday BETWEEN 1 AND 5),
-    timeslot time_slot NOT NULL,
+    timeslot VARCHAR(4) NOT NULL CHECK (timeslot IN ('AM1','AM2','AM3','AM4','PM1','PM2','PM3','PM4')),
 
     UNIQUE (doctor_profile_id, weekday, timeslot)
 );
