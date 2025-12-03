@@ -67,6 +67,12 @@ REATE DATABASE registration_system;
 psql -U postgres -d registration_system -f "src/main/resources/db/init.sql"
 ```
 
+linux环境中执行：
+
+```bash
+psql
+```
+
 就完成了数据库初始化。最后在你的idea中链接数据库就可以了。
 
 ![idea数据库链接](./resources/img/idea数据库链接.png)
@@ -78,6 +84,7 @@ psql -U postgres -d registration_system -f "src/main/resources/db/init.sql"
 这样才合适。
 
 1. 有三个登陆账户：病人（patient）、医生（doctor）、管理员（admin）。但是这只是登陆账户并不是ER图的全部。还有科室等关系实体是我们还没有分离出来的
+  注：我们这里删除的时候是需要将我们设定的`is_active`设为`false`，而不是真的删除。
 2. 我们会架空一个时间体，也就是我们虚拟出了一个周的循环。如果一个病人开始尝试登陆，然后他先选择相应的科室，我们可以先简单的只设置外科 + 内科，选择科室之后他可以看到这个科室下有的疾病，然后他选择他需要去看的疾病，为了明确，我们设置疾病和科室关系如下：
   1. 内科：
     1. 心脏病

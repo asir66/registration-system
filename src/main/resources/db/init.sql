@@ -3,6 +3,8 @@
 -- ==========================================
 DROP TABLE IF EXISTS doctor_department_schedule CASCADE;
 DROP TABLE IF EXISTS patient_doctor_registration CASCADE;
+DROP TABLE IF EXISTS doctor_disease CASCADE;
+DROP TABLE IF EXISTS disease CASCADE;
 DROP TABLE IF EXISTS doctor_profile CASCADE;
 DROP TABLE IF EXISTS patient_profile CASCADE;
 DROP TABLE IF EXISTS app_user CASCADE;
@@ -79,13 +81,51 @@ CREATE TABLE doctor_profile (
 );
 
 -- ==========================================
--- Registration Table
+-- Disease Table
+-- ==========================================
+CREATE TABLE disease (
+                         id SERIAL PRIMARY KEY,
+                         name VARCHAR(100) NOT NULL,
+                         code VARCHAR(50) UNIQUE,
+                         description TEXT,
+                         department_id INT NOT NULL REFERENCES department(id)
+);
+
+-- Insert sample diseases for departments
+-- Internal Medicine (id=1)
+INSERT INTO disease (name, code, description, department_id) VALUES
+    ('Heart Disease', 'IM-HD', '心脏相关疾病', 1),
+    ('Liver Disease', 'IM-LD', '肝脏相关疾病', 1),
+    ('Spleen Disease', 'IM-SD', '脾脏相关疾病', 1),
+    ('Stomach Disease', 'IM-ST', '胃部相关疾病', 1),
+    ('Kidney Disease', 'IM-KD', '肾脏相关疾病', 1);
+
+-- Surgical (id=2)
+INSERT INTO disease (name, code, description, department_id) VALUES
+    ('Hand and Foot', 'SU-HF', '手足相关疾病/外伤', 2),
+    ('Thoracic Surgery', 'SU-TS', '胸外科相关疾病', 2),
+    ('Joint Disease', 'SU-JD', '关节相关疾病', 2),
+    ('Burns', 'SU-BN', '烧伤相关', 2),
+    ('Plastic Surgery', 'SU-PS', '整形相关', 2);
+
+-- ==========================================
+-- Doctor-Disease Relation Table
+-- ==========================================
+CREATE TABLE doctor_disease (
+                                id SERIAL PRIMARY KEY,
+                                doctor_profile_id INT NOT NULL REFERENCES doctor_profile(id),
+                                disease_id INT NOT NULL REFERENCES disease(id),
+                                UNIQUE (doctor_profile_id, disease_id)
+);
+
+-- ==========================================
+-- Registration Table (by Disease)
 -- ==========================================
 CREATE TABLE patient_doctor_registration (
                                              id SERIAL PRIMARY KEY,
                                              patient_profile_id INT REFERENCES patient_profile(id),
                                              doctor_profile_id INT REFERENCES doctor_profile(id),
-                                             department_id INT REFERENCES department(id),
+                                             disease_id INT REFERENCES disease(id),
 
                                              weekday INT NOT NULL CHECK (weekday BETWEEN 1 AND 5),
                                              timeslot time_slot NOT NULL,
@@ -202,3 +242,16 @@ VALUES (
            'Chief Physician',
            1  -- Internal Medicine
        );
+
+-- ==========================================
+-- Map Doctors to Diseases (examples)
+-- ==========================================
+-- doc001 -> Internal Medicine diseases
+INSERT INTO doctor_disease (doctor_profile_id, disease_id)
+SELECT dp.id, d.id FROM doctor_profile dp JOIN disease d ON d.department_id = 1 WHERE dp.doctor_id = '00000001';
+-- doc002 -> Surgical diseases
+INSERT INTO doctor_disease (doctor_profile_id, disease_id)
+SELECT dp.id, d.id FROM doctor_profile dp JOIN disease d ON d.department_id = 2 WHERE dp.doctor_id = '00000002';
+-- doc003 -> Internal Medicine diseases
+INSERT INTO doctor_disease (doctor_profile_id, disease_id)
+SELECT dp.id, d.id FROM doctor_profile dp JOIN disease d ON d.department_id = 1 WHERE dp.doctor_id = '00000003';

@@ -11,7 +11,7 @@ import com.hospital.ouc.registrationsystem.domain.enums.RegistrationStatus;
 
 /**
  * 挂号记录实体，对应数据库表 patient_doctor_registration。
- * 记录患者在指定科室与医生的某一时段的挂号信息及状态。
+ * 记录患者在指定医生的某一时段针对某个疾病的挂号信息及状态。
  */
 @Getter
 @Setter
@@ -43,11 +43,11 @@ public class PatientDoctorRegistration {
     private DoctorProfile doctorProfile;
 
     /**
-     * 科室（非空），多对一关联 department
+     * 疾病（非空），多对一关联 disease
      */
     @ManyToOne(optional = false)
-    @JoinColumn(name = "department_id")
-    private Department department;
+    @JoinColumn(name = "disease_id")
+    private Disease disease;
 
     /**
      * 星期（非空），范围 1-5；由数据库 CHECK 约束保证，同时在实体层做 Bean 校验
