@@ -1,3 +1,43 @@
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+
+import LoginView from '@/views/LoginView.vue';
+import AdminLayout from '@/views/admin/AdminLayout.vue';
+import AdminHomeView from '@/views/admin/AdminHomeView.vue';
+import DoctorLayout from '@/views/doctor/DoctorLayout.vue';
+import DoctorHomeView from '@/views/doctor/DoctorHomeView.vue';
+import PatientLayout from '@/views/patient/PatientLayout.vue';
+import PatientHomeView from '@/views/patient/PatientHomeView.vue';
+
+const routes: RouteRecordRaw[] = [
+  { path: '/', redirect: '/login' },
+  { path: '/login', name: 'login', component: LoginView },
+  {
+    path: '/admin',
+    component: AdminLayout,
+    children: [
+      { path: '', redirect: { name: 'admin-home' } },
+      { path: 'home', name: 'admin-home', component: AdminHomeView },
+      {
+        path: 'patients',
+        name: 'admin-patients',
+        component: () => import('@/views/admin/PatientManagementView.vue'),
+      },
+    ],
+  },
+  {
+    path: '/doctor',
+    component: DoctorLayout,
+    children: [
+      { path: '', redirect: { name: 'doctor-home' } },
+      { path: 'home', name: 'doctor-home', component: DoctorHomeView },
+      {
+        path: 'schedule',
+        name: 'doctor-schedule',
+        component: () => import('@/views/doctor/DoctorScheduleView.vue'),
+      },
+      {
+        path: 'today',
+        name: 'doctor-today',
         component: () => import('@/views/doctor/DoctorTodayTodoView.vue'),
       },
     ],
@@ -6,6 +46,8 @@
     path: '/patient',
     component: PatientLayout,
     children: [
+      { path: '', redirect: { name: 'patient-home' } },
+      { path: 'home', name: 'patient-home', component: PatientHomeView },
       {
         path: 'register',
         name: 'patient-register',
@@ -18,6 +60,7 @@
       },
     ],
   },
+  { path: '/:pathMatch(.*)*', redirect: '/login' },
 ];
 
 const router = createRouter({
@@ -26,37 +69,3 @@ const router = createRouter({
 });
 
 export default router;
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import LoginView from '@/views/LoginView.vue';
-import AdminLayout from '@/views/admin/AdminLayout.vue';
-import DoctorLayout from '@/views/doctor/DoctorLayout.vue';
-import PatientLayout from '@/views/patient/PatientLayout.vue';
-
-const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/login' },
-  { path: '/login', name: 'login', component: LoginView },
-  {
-    path: '/admin',
-    component: AdminLayout,
-    children: [
-      {
-        path: 'patients',
-        name: 'admin-patients',
-        component: () => import('@/views/admin/PatientManagementView.vue'),
-      },
-      // TODO: 医生管理、排班管理
-    ],
-  },
-  {
-    path: '/doctor',
-    component: DoctorLayout,
-    children: [
-      {
-        path: 'schedule',
-        name: 'doctor-schedule',
-        component: () => import('@/views/doctor/DoctorScheduleView.vue'),
-      },
-      {
-        path: 'today',
-        name: 'doctor-today',
-
