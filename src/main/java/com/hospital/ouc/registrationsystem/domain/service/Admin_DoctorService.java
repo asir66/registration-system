@@ -27,9 +27,10 @@ public class Admin_DoctorService {
     // 固定盐值，与系统保持一致
     private static final String SALT = "OucWebDev123";
 
-    // 获取所有医生
+    // 获取所有医生（包括已软删除的）
     public List<DoctorDTO> getAllDoctors() {
-        return doctorProfileRepository.findByIsActive(true).stream()
+        // 改为使用findAll()查询所有医生，不再过滤isActive=true的记录
+        return doctorProfileRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

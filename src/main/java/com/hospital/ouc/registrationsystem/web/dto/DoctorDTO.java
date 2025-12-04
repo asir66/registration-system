@@ -24,6 +24,7 @@ public class DoctorDTO {
 
     private Integer age;
 
+    @NotBlank(message = "性别不能为空")
     @Pattern(regexp = "^(male|female)$", message = "性别必须为male或female")
     private String gender;
 
