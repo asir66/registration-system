@@ -112,10 +112,13 @@ import {
   type Disease,
   type DiseaseTimetableItem,
 } from '@/api/patient-schedule';
+import { createRegistration } from '@/api/registration';
+import { useAuthStore } from '@/stores/auth';
 
 const departments = ref<Department[]>([]);
 const diseases = ref<Disease[]>([]);
 const timetableRaw = ref<DiseaseTimetableItem[]>([]);
+const authStore = useAuthStore();
 
 const loading = reactive({
   departments: false,
@@ -172,6 +175,7 @@ const tableData = computed(() =>
       );
       slotsByDay[day.value] = items.map((t, idx) => ({
         key: `${t.doctorProfileId}-${t.timeslot}-${day.value}-${idx}`,
+        doctorProfileId: t.doctorProfileId,
         doctorId: t.doctorId,
         doctorName: t.doctorName,
         doctorTitle: t.doctorTitle || '',
@@ -179,7 +183,7 @@ const tableData = computed(() =>
         timeslot: t.timeslot,
         remain: (t.maxPatients ?? 16) - (t.currentPatients ?? 0),
         max: t.maxPatients ?? 16,
-        available: t.available ?? true,
+        available: (t.available ?? true) && ((t.maxPatients ?? 16) - (t.currentPatients ?? 0) > 0),
       }));
     });
 
@@ -192,6 +196,7 @@ const tableData = computed(() =>
 );
 
 const selectedSlot = ref<{
+  doctorProfileId: number;
   doctorId: string;
   doctorName: string;
   weekday: number;
@@ -252,23 +257,56 @@ async function loadTimetable() {
 }
 
 function selectSlot(slot: {
+  doctorProfileId: number;
   doctorId: string;
   doctorName: string;
   weekday: number;
   timeslot: string;
+  remain: number;
+  available: boolean;
 }) {
+  if (!slot.available || slot.remain <= 0) {
+    ElMessage.info('该时段已满');
+    return;
+  }
   selectedSlot.value = { ...slot };
 }
 
-function onSubmit() {
+async function onSubmit() {
   if (!selectedSlot.value || !selected.diseaseId) {
     ElMessage.info('请先选择一个医生的时段');
     return;
   }
-  // TODO: 接入挂号提交接口（未提供）。这里先做提示。
-  ElMessage.success(
-    `已选择 ${selectedSlot.value.doctorName} - ${weekdayLabel(selectedSlot.value.weekday)} ${selectedSlot.value.timeslot}，后续对接挂号提交接口`,
-  );
+  const patientProfileId = authStore.user?.patientId;
+  if (!patientProfileId) {
+    ElMessage.error('未找到患者档案，请重新登录患者账号');
+    return;
+  }
+  try {
+    await createRegistration({
+      patientProfileId,
+      doctorProfileId: selectedSlot.value.doctorProfileId,
+      diseaseId: selected.diseaseId,
+      weekday: selectedSlot.value.weekday,
+      timeslot: selectedSlot.value.timeslot,
+    });
+    ElMessage.success('挂号成功');
+    // 本地减少剩余号；若想以接口为准，也可以直接 await loadTimetable();
+    timetableRaw.value = timetableRaw.value.map((t) => {
+      if (
+        t.doctorProfileId === selectedSlot.value?.doctorProfileId &&
+        t.weekday === selectedSlot.value?.weekday &&
+        t.timeslot === selectedSlot.value?.timeslot
+      ) {
+        const current = t.currentPatients ?? 0;
+        const max = t.maxPatients ?? 16;
+        return { ...t, currentPatients: Math.min(current + 1, max) };
+      }
+      return t;
+    });
+  } catch (error: any) {
+    ElMessage.error(error?.response?.data?.message || '挂号失败');
+  }
 }
 
 onMounted(() => {
