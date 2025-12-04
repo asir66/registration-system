@@ -291,4 +291,17 @@ CREATE TABLE doctor_department_schedule (
 - [x] 加盐哈希的密码存储和校验过程
 - [ ] 分工
 
+管理员功能
+1、目前已实现病人管理功能，实现了病人的增删查改
+（1）DTO           
+               PatientDTO（患者信息传输）
+               PatientQueryDTO（患者查询条件）
+（2）业务逻辑层
+               BusinessException 业务异常类（自定义）
+               PatientManagementService 接口
+               PatientManagementServiceImpl 实现类
+（3）接口层
+               AdminPatientController
+
+
 main-分支push测试
