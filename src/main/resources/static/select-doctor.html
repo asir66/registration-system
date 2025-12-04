@@ -397,7 +397,10 @@
                 const response = await fetch(`/api/schedule/doctor/${doctor.id}/schedules`);
 
                 if (response.ok) {
-                    const schedules = await response.json();
+                    // 前端这里是对象而不是数组
+                    const scheduleData = await response.json();
+                    // 后端返回的是 DoctorScheduleDTO 对象，这里取其中的 schedules 数组
+                    const schedules = Array.isArray(scheduleData.schedules) ? scheduleData.schedules : [];
                     state.schedules[doctor.id] = schedules;
                     console.log(`医生"${doctor.name}"的排班加载完成:`, schedules.length, '个排班');
                 } else {
