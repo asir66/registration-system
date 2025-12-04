@@ -10,6 +10,7 @@ export interface LoginResult {
   username: string;
   role: 'ADMIN' | 'DOCTOR' | 'PATIENT';
   doctorId?: string;
+  patientId?: number;
 }
 
 export async function login(payload: LoginPayload) {
