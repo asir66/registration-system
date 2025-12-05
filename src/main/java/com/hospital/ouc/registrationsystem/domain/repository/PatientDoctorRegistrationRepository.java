@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PatientDoctorRegistrationRepository extends JpaRepository<PatientDoctorRegistration, Long> {
 
@@ -19,4 +20,10 @@ public interface PatientDoctorRegistrationRepository extends JpaRepository<Patie
                                                                 Integer weekday,
                                                                 com.hospital.ouc.registrationsystem.domain.enums.TimeSlot timeslot,
                                                                 java.util.Collection<com.hospital.ouc.registrationsystem.domain.enums.RegistrationStatus> statuses);
+
+    // 新增：根据患者档案ID查询挂号记录
+    List<PatientDoctorRegistration> findByPatientProfileId(Long patientProfileId);
+
+    // 新增：根据 id 且属于患者的记录（用于取消时校验归属）
+    Optional<PatientDoctorRegistration> findByIdAndPatientProfileId(Long id, Long patientProfileId);
 }

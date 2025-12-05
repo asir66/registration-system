@@ -178,6 +178,58 @@ public class PatientScheduleService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 新增：供患者前端查看医院医生信息。
+     * 可选过滤：departmentId（按科室），diseaseId（只返回能治疗此病的医生）
+     */
+    public List<DoctorForPatientDTO> getDoctorsOverview(Long departmentId, Long diseaseId) {
+        List<DoctorProfile> doctors;
+        if (diseaseId != null) {
+            // 找到能治疗该疾病的医生档案（只返回激活的医生）
+            List<DoctorDisease> dds = doctorDiseaseRepository.findByDiseaseId(diseaseId);
+            doctors = dds.stream()
+                    .map(DoctorDisease::getDoctorProfile)
+                    .filter(Objects::nonNull)
+                    .filter(DoctorProfile::getIsActive)
+                    .collect(Collectors.toList());
+            // 若同时传了 departmentId，再过滤科室
+            if (departmentId != null) {
+                doctors = doctors.stream()
+                        .filter(d -> d.getDepartment() != null && departmentId.equals(d.getDepartment().getId()))
+                        .collect(Collectors.toList());
+            }
+        } else if (departmentId != null) {
+            doctors = doctorProfileRepository.findByDepartmentIdAndIsActiveTrue(departmentId);
+        } else {
+            doctors = doctorProfileRepository.findByIsActiveTrue();
+        }
+
+        // 为每个 doctor 查找其可治疗的疾病
+        return doctors.stream().map(doc -> {
+            DoctorForPatientDTO dto = new DoctorForPatientDTO();
+            dto.setId(doc.getId());
+            dto.setDoctorId(doc.getDoctorId());
+            dto.setName(doc.getName());
+            dto.setAge(doc.getAge());
+            dto.setGender(doc.getGender() == null ? null : doc.getGender().name());
+            dto.setTitle(doc.getTitle());
+            if (doc.getDepartment() != null) {
+                dto.setDepartmentId(doc.getDepartment().getId());
+                dto.setDepartmentName(doc.getDepartment().getDepartmentName());
+            }
+
+            List<DoctorDisease> doctorDiseases = doctorDiseaseRepository.findByDoctorProfileId(doc.getId());
+            List<DiseaseDTO> diseaseDTOs = doctorDiseases.stream()
+                    .map(dd -> {
+                        Disease d = dd.getDisease();
+                        return convertToDiseaseDTO(d);
+                    })
+                    .collect(Collectors.toList());
+            dto.setDiseases(diseaseDTOs);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
     // 转换方法
     private DepartmentDTO convertToDepartmentDTO(Department department) {
         DepartmentDTO dto = new DepartmentDTO();

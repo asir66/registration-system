@@ -88,4 +88,15 @@ public class PatientScheduleController {
         List<DoctorDTO> doctors = scheduleService.getDoctorsByDepartment(departmentId);
         return ResponseEntity.ok(doctors);
     }
+
+    /**
+     * 获取医院医生信息供患者浏览，可选按科室或疾病筛选
+     */
+    @GetMapping("/doctors")
+    public ResponseEntity<List<DoctorForPatientDTO>> getDoctorsOverview(
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Long diseaseId) {
+        List<DoctorForPatientDTO> doctors = scheduleService.getDoctorsOverview(departmentId, diseaseId);
+        return ResponseEntity.ok(doctors);
+    }
 }

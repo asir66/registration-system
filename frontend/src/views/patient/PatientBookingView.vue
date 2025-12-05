@@ -103,6 +103,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import {
   fetchDepartments,
@@ -119,6 +120,7 @@ const departments = ref<Department[]>([]);
 const diseases = ref<Disease[]>([]);
 const timetableRaw = ref<DiseaseTimetableItem[]>([]);
 const authStore = useAuthStore();
+const router = useRouter();
 
 const loading = reactive({
   departments: false,
@@ -291,6 +293,8 @@ async function onSubmit() {
       timeslot: selectedSlot.value.timeslot,
     });
     ElMessage.success('挂号成功');
+    // 跳转到“我的挂号”页面以便查看详情
+    router.push({ name: 'patient-registrations' });
     // 本地减少剩余号；若想以接口为准，也可以直接 await loadTimetable();
     timetableRaw.value = timetableRaw.value.map((t) => {
       if (

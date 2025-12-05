@@ -5,6 +5,8 @@
       <div class="nav">
         <el-button text @click="$router.push('/patient/home')">首页</el-button>
         <el-button text @click="$router.push('/patient/booking')">挂号</el-button>
+        <el-button text @click="$router.push('/patient/doctors')">医生</el-button>
+        <el-button text @click="$router.push('/patient/registrations')">我的挂号</el-button>
         <el-button text @click="$router.push('/patient/register')">注册</el-button>
         <el-divider direction="vertical" />
         <el-button text @click="$router.push('/login')">退出</el-button>

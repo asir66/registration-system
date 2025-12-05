@@ -78,6 +78,16 @@ const routes: RouteRecordRaw[] = [
         name: 'patient-booking',
         component: () => import('@/views/patient/PatientBookingView.vue'),
       },
+      {
+        path: 'registrations',
+        name: 'patient-registrations',
+        component: () => import('@/views/patient/PatientRegistrationsView.vue'),
+      },
+      {
+        path: 'doctors',
+        name: 'patient-doctors',
+        component: () => import('@/views/patient/PatientDoctorsView.vue'),
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/login' },

@@ -6,10 +6,12 @@ import com.hospital.ouc.registrationsystem.domain.enums.TimeSlot;
 import com.hospital.ouc.registrationsystem.domain.repository.*;
 import com.hospital.ouc.registrationsystem.web.dto.RegistrationRequestDTO;
 import com.hospital.ouc.registrationsystem.web.dto.RegistrationResponseDTO;
+import com.hospital.ouc.registrationsystem.web.dto.PatientRegistrationInfoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientRegistrationService {
@@ -92,5 +94,49 @@ public class PatientRegistrationService {
         resp.setTimeslot(saved.getTimeslot().name());
         resp.setStatus(saved.getStatus().name());
         return resp;
+    }
+
+    // 新增：获取指定患者的挂号记录列表
+    @Transactional(readOnly = true)
+    public List<PatientRegistrationInfoDTO> listRegistrationsByPatient(Long patientProfileId) {
+        List<PatientDoctorRegistration> list = registrationRepository.findByPatientProfileId(patientProfileId);
+        return list.stream().map(this::convertToInfoDTO).collect(Collectors.toList());
+    }
+
+    // 新增：取消挂号（仅允许患者本人取消，将状态设置为 CANCELLED）
+    @Transactional
+    public void cancelRegistration(Long registrationId, Long patientProfileId) {
+        PatientDoctorRegistration reg = registrationRepository.findByIdAndPatientProfileId(registrationId, patientProfileId)
+                .orElseThrow(() -> new RuntimeException("挂号记录不存在或不属于当前患者"));
+
+        if (reg.getStatus() == RegistrationStatus.CANCELLED) {
+            return; // 已取消，幂等
+        }
+
+        reg.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepository.save(reg);
+    }
+
+    private PatientRegistrationInfoDTO convertToInfoDTO(PatientDoctorRegistration reg) {
+        PatientRegistrationInfoDTO dto = new PatientRegistrationInfoDTO();
+        dto.setId(reg.getId());
+        dto.setPatientProfileId(reg.getPatientProfile().getId());
+        dto.setDoctorProfileId(reg.getDoctorProfile().getId());
+        dto.setDoctorId(reg.getDoctorProfile().getDoctorId());
+        dto.setDoctorName(reg.getDoctorProfile().getName());
+        dto.setDoctorTitle(reg.getDoctorProfile().getTitle());
+
+        dto.setDiseaseId(reg.getDisease().getId());
+        dto.setDiseaseName(reg.getDisease().getName());
+        if (reg.getDisease().getDepartment() != null) {
+            dto.setDepartmentId(reg.getDisease().getDepartment().getId());
+            dto.setDepartmentName(reg.getDisease().getDepartment().getDepartmentName());
+        }
+
+        dto.setWeekday(reg.getWeekday());
+        dto.setTimeslot(reg.getTimeslot() != null ? reg.getTimeslot().name() : null);
+        dto.setStatus(reg.getStatus() != null ? reg.getStatus().name() : null);
+        dto.setRegistrationTime(reg.getRegistrationTime());
+        return dto;
     }
 }
