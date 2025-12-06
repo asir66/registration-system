@@ -8,7 +8,7 @@ export interface DoctorDayScheduleItem {
     patientPhone: string;
     patientAge: number | null;
     patientGender: string;
-    canceled?: boolean; // Optional: Cancellation status
+    canceled?: boolean;
 }
 
 export interface DoctorWeekScheduleItem {
