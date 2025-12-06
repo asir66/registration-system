@@ -1,0 +1,12 @@
+HTTP/1.1 404 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Sat, 06 Dec 2025 07:23:21 GMT
+
+{"timestamp":"2025-12-06T07:23:21.839Z","status":404,"error":"Not Found","path":"/api/admin/schedule/batch/department/1/clear"}

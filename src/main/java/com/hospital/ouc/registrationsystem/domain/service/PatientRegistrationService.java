@@ -9,6 +9,7 @@ import com.hospital.ouc.registrationsystem.web.dto.RegistrationResponseDTO;
 import com.hospital.ouc.registrationsystem.web.dto.PatientRegistrationInfoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.hospital.ouc.registrationsystem.web.ws.SimpleWebSocketHandler;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class PatientRegistrationService {
     private final DoctorDepartmentScheduleRepository scheduleRepository;
     private final DoctorDiseaseRepository doctorDiseaseRepository;
     private final PatientDoctorRegistrationRepository registrationRepository;
+    private final SimpleWebSocketHandler webSocketHandler;
 
     private static final int DEFAULT_MAX_PER_SLOT = 2;
 
@@ -30,13 +32,15 @@ public class PatientRegistrationService {
                                       DiseaseRepository diseaseRepository,
                                       DoctorDepartmentScheduleRepository scheduleRepository,
                                       DoctorDiseaseRepository doctorDiseaseRepository,
-                                      PatientDoctorRegistrationRepository registrationRepository) {
+                                      PatientDoctorRegistrationRepository registrationRepository,
+                                      SimpleWebSocketHandler webSocketHandler) {
         this.patientProfileRepository = patientProfileRepository;
         this.doctorProfileRepository = doctorProfileRepository;
         this.diseaseRepository = diseaseRepository;
         this.scheduleRepository = scheduleRepository;
         this.doctorDiseaseRepository = doctorDiseaseRepository;
         this.registrationRepository = registrationRepository;
+        this.webSocketHandler = webSocketHandler;
     }
 
     @Transactional
@@ -115,6 +119,19 @@ public class PatientRegistrationService {
 
         reg.setStatus(RegistrationStatus.CANCELLED);
         registrationRepository.save(reg);
+        // 广播取消事件给所有已连接的客户端（医生端会监听并处理）
+        try {
+            var payload = new java.util.HashMap<String, Object>();
+            payload.put("type", "appointment_cancelled");
+            payload.put("doctorId", reg.getDoctorProfile().getDoctorId());
+            payload.put("appointmentId", reg.getId());
+            payload.put("patientId", reg.getPatientProfile().getId());
+            payload.put("canceledAt", java.time.LocalDateTime.now().toString());
+            String msg = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(payload);
+            webSocketHandler.broadcast(msg);
+        } catch (Exception ex) {
+            // ignore websocket broadcast errors
+        }
     }
 
     private PatientRegistrationInfoDTO convertToInfoDTO(PatientDoctorRegistration reg) {

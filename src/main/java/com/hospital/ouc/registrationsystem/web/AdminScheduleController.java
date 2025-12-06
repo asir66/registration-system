@@ -67,4 +67,13 @@ public class AdminScheduleController {
         scheduleManageService.batchDeleteScheduleByDeptId(deptId);
         return ResultDTO.success(null);
     }
+
+    /**
+     * 批量清空指定科室的所有排班
+     */
+    @PostMapping("/batch/department/{deptId}/clear")
+    public ResultDTO<Void> batchClearScheduleByDeptId(@PathVariable Long deptId) {
+        scheduleManageService.batchDeleteScheduleByDeptId(deptId);
+        return ResultDTO.success(null);
+    }
 }
