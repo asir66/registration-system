@@ -38,6 +38,14 @@ public class DoctorScheduleService {
             item.setPatientPhone(p.getPhoneNumber());
             item.setPatientAge(p.getAge());
             item.setPatientGender(p.getGender().name());
+            // 新增：根据挂号状态判断是否已取消
+            try {
+                item.setCanceled(r.getStatus() == com.hospital.ouc.registrationsystem.domain.enums.RegistrationStatus.CANCELLED);
+                item.setStatus(r.getStatus() != null ? r.getStatus().name() : null);
+            } catch (Exception e) {
+                item.setCanceled(false);
+                item.setStatus(null);
+            }
             return item;
         }).collect(Collectors.toList());
     }

@@ -25,21 +25,31 @@
       <el-table-column prop="patientPhone" label="手机号" width="150" />
       <el-table-column prop="patientAge" label="年龄" width="80" />
       <el-table-column prop="patientGender" label="性别" width="90" />
+
+      <!-- 新增：是否取消 列 -->
+      <el-table-column label="是否取消" width="120">
+        <template #default="{ row }">
+          <el-tag v-if="isCanceled(row)" type="danger" size="small">已取消</el-tag>
+          <el-tag v-else type="info" size="small">待接诊</el-tag>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { fetchDoctorDaySchedule, type DoctorDayScheduleItem } from '@/api/doctor';
 import { useAuthStore } from '@/stores/auth';
+import { useDoctorStore } from '@/stores/doctor';
 
 const auth = useAuthStore();
 const doctorId = auth.user?.doctorId || '';
 const loading = ref(false);
 const weekday = ref<number>(new Date().getDay());
-const tableData = ref<DoctorDayScheduleItem[]>([]);
+const doctorStore = useDoctorStore();
+const tableData = computed<DoctorDayScheduleItem[]>(() => doctorStore.todayQueue as DoctorDayScheduleItem[]);
 
 const weekdays = reactive([
   { label: '周一', value: 1 },
@@ -54,12 +64,26 @@ async function load() {
   loading.value = true;
   try {
     const wd = weekday.value < 1 || weekday.value > 5 ? 1 : weekday.value;
-    tableData.value = await fetchDoctorDaySchedule(doctorId, wd);
+    const data = await fetchDoctorDaySchedule(doctorId, wd);
+    // 初始化 doctor store 的今日列表，这样后端通过 websocket 广播时 store 能更新并触发界面刷新
+    doctorStore.init(doctorId, [], data, /*availableSlots*/ 0);
   } catch (error: any) {
     ElMessage.error(error?.response?.data?.message || '加载失败');
   } finally {
     loading.value = false;
   }
+}
+
+// 新：判断是否取消
+function isCanceled(row: any): boolean {
+  if (!row) return false;
+  if (typeof row.canceled === 'boolean') return row.canceled;
+  if (typeof row.status === 'string') {
+    const s = row.status.toLowerCase();
+    return s === 'cancel' || s === 'cancelled' || s === 'canceled';
+  }
+  if (row.canceledAt) return true;
+  return false;
 }
 
 onMounted(() => {

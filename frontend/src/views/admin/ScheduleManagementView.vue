@@ -28,7 +28,7 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button size="small" type="primary" @click="openEdit(row)">编辑</el-button>
-            <el-popconfirm title="确认删除该排班？" confirm-button-text="删除" @confirm="() => onDelete(row)">
+            <el-popconfirm title="确认删除该排班？" confirm-button-text="删除" @confirm="onDelete(row)">
               <template #reference>
                 <el-button size="small" type="danger">删除</el-button>
               </template>
@@ -40,7 +40,7 @@
       <div v-if="!schedules.length && selectedDeptId && !loading" class="empty-note">该科室暂无排班</div>
     </el-card>
 
-    <el-dialog :title="dialogTitleLocal" :visible.sync="dialogVisible" width="520px" :destroy-on-close="true">
+    <el-dialog v-model="dialogVisible" :title="dialogTitleLocal" width="520px" :destroy-on-close="true">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="140px">
         <el-form-item label="科室" prop="departmentId">
           <el-select v-model.number="form.departmentId" disabled>
@@ -89,6 +89,7 @@ import {
   updateSchedule,
   deleteSchedule,
   batchDeleteScheduleByDept,
+  batchClearScheduleByDept,
   fetchDoctorsByDepartment,
   type ScheduleDTO,
   type DoctorDepartmentSchedule,
@@ -259,12 +260,48 @@ async function confirmBatchDelete() {
   try {
     await ElMessageBox.confirm('确认清空该科室所有排班？此操作不可逆。', '清空确认', { type: 'warning' });
   } catch { return; }
+
+  if (!selectedDeptId.value) return ElMessage.error('请选择科室后再操作');
+
+  loading.value = true;
   try {
-    const res = await batchDeleteScheduleByDept(selectedDeptId as unknown as number);
-    if (!res || res.code !== 200) throw new Error(res?.msg || '清空失败');
-    ElMessage.success('已清空该科室排班');
-    await onDeptChange();
-  } catch (err: any) { ElMessage.error(getErrorMessage(err)); }
+    // 首选：POST 清空（兼容性更好）
+    try {
+      const res = await batchClearScheduleByDept(selectedDeptId.value as number);
+      if (!res || res.code !== 200) throw new Error(res?.msg || '清空失败');
+      ElMessage.success('已清空该科室排班');
+      await onDeptChange();
+      return;
+    } catch (err: any) {
+      // 如果返回 HTML 错误页或其它非 JSON 响应，尝试回退到 DELETE
+      // 尝试解析 HTML 错误以便展示更友好的错误信息
+      if (err && err.response && err.response.headers && typeof err.response.data === 'string') {
+        const ct = err.response.headers['content-type'] || err.response.headers['Content-Type'];
+        if (ct && ct.indexOf && ct.indexOf('text/html') !== -1) {
+          // 展示简短错误信息（避免注入大段 HTML）
+          const status = err.response.status;
+          ElMessage.error(`服务器返回错误（HTTP ${status}），请检查后端日志`);
+          return;
+        }
+      }
+
+      // 回退：尝试 DELETE 端点
+      try {
+        const res2 = await batchDeleteScheduleByDept(selectedDeptId.value as number);
+        if (!res2 || res2.code !== 200) throw new Error(res2?.msg || '清空失败');
+        ElMessage.success('已清空该科室排班（使用 DELETE 回退）');
+        await onDeptChange();
+        return;
+      } catch (err2: any) {
+        throw err2 || err;
+      }
+    }
+  } catch (err: any) {
+    console.error('[Schedule] clear error:', err);
+    ElMessage.error(getErrorMessage(err));
+  } finally {
+    loading.value = false;
+  }
 }
 
 // initial load
