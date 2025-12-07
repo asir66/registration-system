@@ -2,14 +2,14 @@
 
 技术栈（必须一致）
 
-   后端：
+后端：
 - Spring Boot 4.0.0
 - Spring MVC
 - Spring Data JPA
 - Spring Security（按三类用户分端登录）
 - PostgreSQL
 
-   前端：
+前端：
 - Vue3（Composition API）
 - Vite
 - ElementPlus
@@ -17,7 +17,7 @@
 - Pinia
 - Axios
 
-   架构模式：
+架构模式：
 - 前后端分离
 - RESTful API
 
@@ -257,7 +257,8 @@ CREATE TABLE doctor_department_schedule (
 
 实现了登陆逻辑的跳转，将登陆验证相关的东西实现，密码是哈希加盐存储。盐为：OucWebDev123  
 
-**已实现功能**
+# 已实现功能
+
 管理员功能
 1、目前已实现病人管理功能，实现了病人的增删查改：可以按照姓名、身份证号、电话号、性别来进行查询，姓名可以模糊查询（创新点）
 （1）DTO           
