@@ -20,4 +20,7 @@ public interface DutyScheduleService {
 
     // 批量删除科室所有值班记录
     void batchDeleteDutyScheduleByDeptId(Long departmentId);
+
+    // 新增：查询所有值班记录（用于患者端展示）
+    List<DoctorDutySchedule> getAllDutySchedules();
 }

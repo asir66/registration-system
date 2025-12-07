@@ -27,7 +27,7 @@
           stripe
           style="width: 100%;"
       >
-        <el-table-column prop="weekendType" label="值班日期" width="120">
+        <el-table-column prop="weekendType" label="值班星期" width="120">
           <template #default="scope">
             {{ scope.row.weekendType === 6 ? '周六' : '周日' }}
           </template>

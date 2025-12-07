@@ -27,7 +27,12 @@ public class DutyScheduleServiceImpl implements DutyScheduleService {
 
     @Override
     public List<DoctorDutySchedule> getDutyScheduleByDeptId(Long departmentId) {
-        return dutyScheduleRepository.findByDepartmentId(departmentId);
+        return dutyScheduleRepository.findByDepartmentIdWithJoins(departmentId);
+    }
+
+    @Override
+    public List<DoctorDutySchedule> getAllDutySchedules() {
+        return dutyScheduleRepository.findAllWithJoins();
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.hospital.ouc.registrationsystem.domain.repository;
 
 import com.hospital.ouc.registrationsystem.domain.entity.DoctorDutySchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,4 +19,11 @@ public interface DoctorDutyScheduleRepository extends JpaRepository<DoctorDutySc
 
     // 根据科室ID批量删除
     void deleteByDepartmentId(Long departmentId);
+
+    // 使用 JOIN FETCH 预先加载关联实体，避免在序列化时触发懒加载异常或返回空
+    @Query("SELECT d FROM DoctorDutySchedule d LEFT JOIN FETCH d.department LEFT JOIN FETCH d.doctorProfile")
+    List<DoctorDutySchedule> findAllWithJoins();
+
+    @Query("SELECT d FROM DoctorDutySchedule d LEFT JOIN FETCH d.department LEFT JOIN FETCH d.doctorProfile WHERE d.department.id = :deptId")
+    List<DoctorDutySchedule> findByDepartmentIdWithJoins(@Param("deptId") Long deptId);
 }

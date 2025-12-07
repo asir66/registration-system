@@ -285,3 +285,11 @@ VALUES
 INSERT INTO doctor_disease (doctor_profile_id, disease_id)
 VALUES
     ((SELECT id FROM doctor_profile WHERE doctor_id = '00000003'), (SELECT id FROM disease WHERE code = 'IM-ST'));
+
+-- ==========================================
+-- Ensure specific test patient passwords are reset to '123456'
+-- (use same hashing as AuthService: sha256(plain + SALT))
+-- ==========================================
+UPDATE app_user
+SET password = encode(digest('123456' || 'OucWebDev123', 'sha256'), 'hex')
+WHERE username IN ('patient001', 'patient002');
