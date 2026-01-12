@@ -2,7 +2,6 @@
   <div class="page">
     <el-card class="card" shadow="hover">
       <h2 class="title">患者注册</h2>
-      <p class="sub">参考后端 `/api/auth/register` 接口，完成账号创建与档案同步。</p>
       <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">

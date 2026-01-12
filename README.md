@@ -213,7 +213,11 @@ CREATE TABLE doctor_department_schedule (
 
 ---
 
-![ER图](./resources/img/ER图-test.png)
+# ER图
+初步设计ER图如下：
+![ER图-test](./resources/img/ER图-test.png)
+进一步细化的ER图如下：
+![ER图-real](./resources/img/ER图-real.png)
 
 # 项目结构
 

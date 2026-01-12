@@ -3,7 +3,7 @@
     <div class="header">
       <div>
         <h2>病人管理</h2>
-        <p class="sub">支持按姓名/身份证/手机号/性别查询，新增、编辑、逻辑删除。</p>
+        <p class="sub">支持按姓名/身份证/手机号/性别查询，新增、编辑、删除。</p>
       </div>
       <el-button type="primary" @click="openCreate">新增患者</el-button>
     </div>

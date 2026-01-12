@@ -1,9 +1,9 @@
-<template>
+ <template>
   <div class="page">
     <div class="header">
       <div>
         <h2>医生管理</h2>
-        <p class="sub">维护医生账号、科室、可诊断疾病，支持软删除。</p>
+        <p class="sub">维护医生账号、科室、可诊断疾病</p>
       </div>
       <el-button type="primary" @click="openCreate">新增医生</el-button>
     </div>
