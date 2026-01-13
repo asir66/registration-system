@@ -95,7 +95,7 @@
       <div v-else class="selection">
         <p>医生：{{ selectedSlot.doctorName }}（{{ selectedSlot.doctorId }}）</p>
         <p>星期：{{ weekdayLabel(selectedSlot.weekday) }} / 时段：{{ selectedSlot.timeslot }}</p>
-        <el-button type="primary" @click="onSubmit">提交挂号（示例）</el-button>
+        <el-button type="primary" @click="onSubmit">提交挂号</el-button>
       </div>
     </el-card>
   </div>

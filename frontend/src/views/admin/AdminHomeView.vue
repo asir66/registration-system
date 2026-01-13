@@ -5,7 +5,7 @@
         <p class="eyebrow">Administrator</p>
         <h2>欢迎来到挂号系统管理台</h2>
         <p class="sub">
-          统一入口管理患者档案、医生信息与排班。先从核心任务开始，后续再按模块细化。
+          统一入口管理患者档案、医生信息与排班。
         </p>
         <div class="actions">
           <el-button type="primary" @click="$router.push('/admin/patients')">进入病人管理</el-button>
